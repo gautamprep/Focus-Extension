@@ -1,0 +1,1 @@
+const g=(k)=>new Promise(res=>chrome.storage.local.get(k,v=>res(k?v[k]:v)));const s=(o)=>new Promise(res=>chrome.storage.local.set(o,res));const n=document.getElementById('name');g('name').then(v=>n.value=v||'');document.getElementById('save').addEventListener('click',async()=>{await s({name:n.value.trim()});});

@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>New Tab</title>
+  <!-- Added version query parameter to bust caching of the stylesheet -->
+  <!-- Version bump for stylesheet to refresh cached file during development -->
+  <link rel="stylesheet" href="newtab.css?v=19">
+  <!-- Removed remote Flatpickr styles to comply with extension CSP. We rely on native date input instead. -->
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> -->
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css"> -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=Open+Sans&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="overlay"></div>
+
+  <header class="top">
+    <div></div>
+    <div class="actions">
+      <button id="examsBtn" title="Track Your Goals">📅 Track Your Goals</button>
+      
+    </div>
+  </header>
+
+  <main class="center">
+    <div id="time" class="clock">--:--</div>
+    <div id="greeting" class="greeting">
+      <span id="greetText">Hello</span><span id="greetComma" class="hidden">, </span>
+      <span id="greetName" class="hidden" title="Click to edit name"></span>
+      <input id="greetNameInput" class="greet-name-input hidden" placeholder="your name" />
+    </div>
+
+    <div class="focus-wrap">
+      <label>What is your main goal for today?</label>
+
+      <!-- Goal input (shown when no goal yet or editing) -->
+      <input id="goalInput" class="goal-input" placeholder="">
+
+      <!-- Goal display row (shown after saving) -->
+      <div id="goalDisplay" class="goal-display hidden">
+        <label class="goal-check">
+          <input type="checkbox" id="goalDone">
+          <span class="checkmark"></span>
+        </label>
+        <div id="goalText" class="goal-text">—</div>
+        <button id="goalEdit" class="icon-btn" title="Edit goal">✎</button>
+        <button id="goalNew" class="icon-btn" title="Add new goal">＋</button>
+      </div>
+    </div>
+  </main>
+
+  <aside class="right-rail">
+    <div id="examsList" class="exams-list hidden"></div>
+  </aside>
+
+  <div class="todo-toggle" id="todoToggle"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 5px;"><rect class="box" x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><path class="tick" d="M9 12l2 2 4-4"></path></svg>To-Do List</div>
+  <div class="todo-pop" id="todoPop">
+    <div class="todo-head">To-Do List <span id="todoStatusText">#One At a Time</span></div>
+    <div id="todoMascot" class="todo-mascot" aria-hidden="true"><span id="todoMascotEmoji" class="emoji">👀</span></div>
+    <input id="todoInput" class="todo-input" placeholder="Add a task and press Enter">
+    <ul id="todoList"></ul>
+  </div>
+
+  <!-- Settings button (bottom-right). Opens the customization & donation dialog -->
+  <!-- Use a simple # symbol to represent settings/donations without implying a specific emotion -->
+  <button id="settingsToggle" class="settings-btn" title="Customize Focus">#</button>
+
+  <footer class="bottom">
+    <div class="quote" id="quote">
+      <span id="quoteText"></span>
+      <span id="quoteAuthor"></span>
+    </div>
+  
+  <!-- Credit pill: will be updated to show Pixabay attribution or hidden if custom image -->
+  <a id="bgCredit" class="credit-pill" href="#" target="_blank" rel="noopener"></a>
+
+
+  
+    
+
+  </footer>
+
+  <!-- Exams dialog -->
+  <dialog id="examsDialog">
+    <form method="dialog" class="exams-form">
+      <h3>Track Your Goals</h3>
+      <label>Goal Name</label>
+      <input type="text" id="examName" placeholder="e.g., JEE Main 2026" required>
+      <label>Goal Date</label>
+      <input type="date" id="examDate" required>
+      <div class="row">
+        <button id="cancelExam" type="button" class="btn ghost">Cancel</button>
+        <button id="saveExam" type="button" class="btn primary">Save</button>
+      </div>
+      <div id="examsAll" class="exams-all"></div>
+    </form>
+  </dialog>
+
+  <!-- Settings overlay: Combined donation info & background options -->
+  <div id="settingsOverlay">
+    <div class="settings-card">
+      <form class="settings-form">
+        <button type="button" id="settingsCloseX" class="dialog-close">×</button>
+        <!-- Reordered content: first show background settings, then donation details -->
+        <h3>Customize Focus</h3>
+        <h4>🌄 Background Settings</h4>
+        <p id="currentBgInfo" style="font-size:14px; opacity:.88; margin:4px 0 8px;">Loading current background...</p>
+        <input type="file" id="bgUpload" accept="image/*" class="hidden">
+        <div class="row">
+          <button type="button" id="bgUploadButton" class="btn primary upload-btn">Click here to upload an image</button>
+          <button type="button" id="bgRemoveButton" class="btn ghost">Remove</button>
+          <button type="button" id="bgCancelButton" class="btn ghost">Cancel</button>
+        </div>
+        <!-- Divider for visual separation between background controls and donation info -->
+        <hr class="settings-divider">
+        <div class="donate-content">
+          <p>Thank you for choosing <strong class="accent">Focus Extension</strong>! We’re on a mission to help students cut through distractions and stay motivated with a tool designed for productivity and clarity.</p>
+          <p style="margin:8px 0; font-weight:bold;">✨ One Tab. One Mission. One Focus. ✨</p>
+          <p style="margin:6px 0"><em>Coming soon to Focus:</em></p>
+          <ul class="donate-list columns-two">
+            <li>⏱ Pomodoro Watch</li>
+            <li>📚 Study Mode</li>
+            <li>⌛ Smart Countdown Timer</li>
+            <li>🚫 Distraction Blocker</li>
+            <li>🧠 Daily Fact of the Day</li>
+            <li>📱 Screen Time Tracker</li>
+          </ul>
+          <p style="margin-top:4px">Your support helps us keep <strong class="accent">Focus Extension</strong> free for every student while we continue to build and improve it.</p>
+        </div>
+        <div class="row" style="margin-top:16px">
+          <a class="btn primary" id="settingsDonateNow" href="https://razorpay.me/@gautamkumarrajkumar" target="_blank" rel="noopener">Donate</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Removed remote Flatpickr script to comply with extension CSP. -->
+  <!-- Append a version query to bust caching of newtab.js when updated -->
+  <!-- Bump version to bust caching of updated script -->
+  <script src="newtab.js?v=13"></script>
+</body>
+</html>

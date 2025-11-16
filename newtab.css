@@ -1,0 +1,1133 @@
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#fff;overflow:hidden}
+
+/* Accent text color used to highlight key brand names like 'Focus Extension' */
+.accent {
+  color: #69a6ff;
+  font-weight: 700;
+}
+.bg{
+  position:fixed;
+  inset:0;
+  /* Use our custom evergreen forest as the default background.  We reference the
+     asset via a relative path so chrome.runtime.getURL can resolve it when
+     loaded inside an extension.  The transition ensures smooth fades when
+     backgrounds change. */
+  background:url('assets/default_bg.jpg') center/cover no-repeat;
+  transition: background-image 1s ease-in-out;
+}
+/* Overlay for readability */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.28)}
+.top{position:fixed;left:0;right:0;top:16px;display:flex;justify-content:flex-end;z-index:2;padding:0 24px}
+.actions button,.actions a{margin-left:10px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.35);backdrop-filter:blur(10px);color:#fff;padding:8px 12px;border-radius:12px;text-decoration:none;transition:all .2s ease-in-out}
+.center{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-top:20vh}
+.clock{font-size:96px;font-weight:700;line-height:1;text-shadow:0 6px 24px rgba(0,0,0,.55);margin-bottom:8px;animation:fadeInUp .6s ease both}
+.greeting{font-size:28px;font-weight:700;margin-bottom:18px;text-shadow:0 3px 14px rgba(0,0,0,.4);animation:fadeInUp .6s ease .1s both}
+.greet-name-input, .greeting span { transition: opacity .3s ease, transform .3s ease; }
+.greet-name-input{display:inline-block;background:transparent;border:none;border-bottom:2px solid rgba(255,255,255,.85);outline:none;margin-left:6px;padding:2px 4px 4px;color:#fff;font:inherit;width:180px;transition:all .2s ease-in-out}
+
+/* Ensure the placeholder text for the name input appears white instead of grey */
+.greet-name-input::placeholder {
+  /* Use a softer shade so users recognize it as a placeholder and know to input their name */
+  color: rgba(255, 255, 255, 0.6);
+}
+.hidden{display:none !important}
+.focus-wrap{animation:fadeInUp .6s ease .2s both}
+.focus-wrap label{display:block;font-size:20px;margin-bottom:8px}
+.goal-input{width:35%;max-width:520px;min-width:260px;margin:0 auto 8px;display:block;background:transparent;border:none;border-bottom:2px solid rgba(255,255,255,.85);padding:6px 2px;font-size:18px;color:#fff;outline:none;text-align:center;transition:all .2s ease-in-out; transition: opacity .3s ease, transform .3s ease;}
+.goal-input::placeholder{color:rgba(255,255,255,.85)}
+/* goal display row */
+.goal-display{display:inline-flex;gap:10px;align-items:baseline;justify-content:center; transition: opacity .3s ease, transform .3s ease;}
+
+/* Premium glass checkbox for Goal (aligned, smaller) */
+.goal-check input{
+  -webkit-appearance:none; appearance:none;
+  width:18px; height:18px; margin:0 8px 0 0;
+  display:inline-grid; place-content:center;
+  position:relative; top:calc((1em - 18px)/2 - 1px); /* exact baseline centering */
+  border-radius:6px;
+  background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.05));
+  border:1px solid rgba(255,255,255,.28);
+  backdrop-filter:blur(8px);
+  box-shadow:0 5px 12px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.22);
+  transition:background .14s ease, box-shadow .14s ease, border-color .14s ease;
+}
+.goal-check input:hover{border-color:rgba(255,255,255,.45)}
+.goal-check input:focus-visible{outline:none; box-shadow:0 0 0 3px rgba(255,255,255,.18), 0 6px 18px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.24)}
+.goal-check input::after{
+  content:""; width:8px; height:5px;
+  border-left:2px solid #fff; border-bottom:2px solid #fff;
+  transform:scale(0) rotate(-45deg); transform-origin:center;
+  transition:transform .12s ease-out;
+}
+.goal-check input:checked{
+  background:
+    linear-gradient(180deg, rgba(46,204,113,.55), rgba(46,204,113,.32)),
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+  border-color:rgba(255,255,255,.50);
+  box-shadow:0 8px 18px rgba(46,204,113,.24), inset 0 1px 0 rgba(255,255,255,.26);
+}
+.goal-check input:checked::after{ transform:scale(1) rotate(-45deg); }
+.goal-text{font-size:22px;line-height:1;font-weight:700}
+
+.goal-text{font-size:22px;line-height:1;font-weight:700}
+.icon-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  height:28px; min-width:28px; padding:4px 8px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.06);
+  color:#fff; border-radius:12px; cursor:pointer;
+  line-height:1; font-size:16px;
+}
+.icon-btn:hover{filter:brightness(1.08)}
+.quote{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;font-size:16px;text-shadow:0 2px 8px rgba(0,0,0,.8); width: 80%; max-width: 800px; text-align: center;}
+.quote #quoteText { display: block; color: #F5F5F5; }
+.quote #quoteAuthor { display: block; margin-top: 4px; opacity: 0.9; font-style: italic; color: #E0E0E0; }
+
+/* Right rail exams - slightly larger gap for clarity */
+.right-rail{position:fixed;right:24px;top:86px;display:flex;flex-direction:column;gap: 8px;z-index:1}
+.exams-list.hidden{opacity:0;pointer-events:none}
+/* Lay out exam cards in two columns so that six cards occupy three rows.
+   Grid layout allows the cards to wrap neatly while preserving their existing
+   height.  We restrict each card to take up half of the available width. */
+.exams-list{ display:flex; flex-direction:column; gap:8px; }
+/* Premium glass cards */
+.right-rail .exam-card{position:relative;min-width:120px;max-width:180px;border-radius:12px;padding:6px 8px;backdrop-filter:blur(16px);background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.22);box-shadow:0 14px 30px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.22);animation:fadeInUp .45s ease both;margin-bottom:.1cm; overflow:hidden}
+.exam-card::before{content:'';position:absolute;inset:0;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,0) 42%);opacity:.35;pointer-events:none}
+.exam-card{ --accent:#69a6ff; }
+.right-rail .exam-card .head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:2px; flex-wrap:nowrap; gap:3px; }
+.right-rail .exam-card .days{font-size:12px;font-weight:700;letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.25); white-space:nowrap; }
+.right-rail .exam-card .days .num{
+  font-size:20px;font-weight:800;margin-right:4px;display:inline-block;
+  background:linear-gradient(180deg,var(--accent),#ffffff);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.right-rail .exam-card .name{
+  font-size:12px;font-weight:700;opacity:.98;
+  white-space:normal; word-break:break-word; overflow:hidden;
+  display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; /* wrap up to 2 lines */
+}
+.right-rail .exam-card .date{font-size:9px;font-style:italic;opacity:.95}
+.right-rail .exam-card .date-row{ display:flex; align-items:center; gap:3px; margin-top:2px; }
+.right-rail .exam-card .cal{ width:9px; height:9px; color:#fff; opacity:.9; }
+.right-rail .exam-card .urgency{ font-size:14px; padding:0 4px; border-radius:999px; border:1px solid currentColor; color:var(--accent); background:rgba(0,0,0,.18); backdrop-filter: blur(8px); white-space:nowrap; position:absolute; top:3px; right:3px; line-height:1; opacity:0; transform: translateY(-3px); transition: opacity .18s ease, transform .18s ease; }
+.exam-card:hover .urgency{ opacity:1; transform: translateY(0); }
+.right-rail .exam-card .progress{ position:relative; height:2px; border-radius:999px; background:rgba(255,255,255,.12); margin-top:4px; overflow:hidden; }
+.exam-card .progress .fill{ position:absolute; left:0; top:0; bottom:0; width:0; border-radius:inherit; background:linear-gradient(90deg, var(--accent), rgba(255,255,255,.9)); transition: width .45s ease; }
+
+/* When placed inside a grid, remove the max‑width constraint on exam cards so they
+   stretch to fill their cell.  Without this, the hard 180px maximum on
+   exam cards would cause awkward spacing when two cards are presented in a
+   single row. */
+.exams-list .exam-card{
+  max-width:none;
+  width:100%;
+}
+.exam-card.red{--accent:#ff6b6b;background:linear-gradient(180deg,rgba(255,95,95,.22),rgba(255,50,50,.10)),linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.05));border-color:rgba(255,110,110,.44);box-shadow:0 18px 36px rgba(255,0,0,.22),inset 0 1px 0 rgba(255,255,255,.25)}
+.exam-card.amber{--accent:#ffb84d;background:linear-gradient(180deg,rgba(255,210,80,.22),rgba(255,160,0,.10)),linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.05));border-color:rgba(255,200,0,.42);box-shadow:0 18px 36px rgba(255,170,0,.22),inset 0 1px 0 rgba(255,255,255,.25)}
+.exam-card.teal{--accent:#3ddad8;background:linear-gradient(180deg,rgba(0,210,210,.22),rgba(0,150,190,.10)),linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.05));border-color:rgba(0,200,200,.40);box-shadow:0 18px 36px rgba(0,170,170,.22),inset 0 1px 0 rgba(255,255,255,.25)}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes backgroundPan {
+  from { background-position: 0% 0%; }
+  to { background-position: 100% 100%; }
+}
+/* To-Do frosted dark */
+.todo-toggle{position:fixed;left:20px;bottom:20px;padding:8px 12px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.6);backdrop-filter:blur(12px);border-radius:12px;z-index:2;cursor:pointer;font-weight:700}
+.todo-pop{position:fixed;left:20px;bottom:64px;width:300px;padding:12px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.6);backdrop-filter:blur(12px);border-radius:16px;box-shadow:0 12px 28px rgba(0,0,0,.35);z-index:2;opacity:0;transform:translateY(20px);transition:opacity .3s ease-out, transform .3s ease-out;pointer-events:none}
+.todo-pop.open{opacity:1;transform:translateY(0);pointer-events:auto}
+.todo-head{font-weight:600;margin-bottom:6px}
+#todoPop .todo-mascot{ position:absolute; right:10px; top:10px; pointer-events:none; opacity:.9; }
+.todo-mascot .emoji{ display:inline-block; transition: transform .25s ease, opacity .2s ease; filter: drop-shadow(0 2px 6px rgba(0,0,0,.4)); }
+.mascot-nod{ animation: mascotNod .5s ease; }
+.mascot-peek{ animation: mascotPeek .6s ease; }
+.mascot-shake{ animation: mascotShake .4s ease; }
+@keyframes mascotNod{ 0%{ transform: translateY(0) rotate(0)} 30%{ transform: translateY(2px) rotate(8deg)} 60%{ transform: translateY(0) rotate(0)} 85%{ transform: translateY(2px) rotate(6deg)} 100%{ transform: translateY(0) rotate(0)} }
+@keyframes mascotPeek{ 0%{ transform: translateY(6px); opacity:.6 } 40%{ transform: translateY(0); opacity:1 } 100%{ transform: translateY(0); opacity:1 } }
+@keyframes mascotShake{ 0%,100%{ transform: translateX(0)} 25%{ transform: translateX(-3px)} 50%{ transform: translateX(3px)} 75%{ transform: translateX(-2px)} }
+#todoStatusText {
+  color: #1f6feb; /* Blue color */
+  font-size: 0.9em; /* Slightly smaller than the main heading */
+  margin-left: 8px; /* Space from the main heading */
+  font-family: 'Montserrat', 'Open Sans', 'Helvetica Neue', sans-serif; /* Example premium fonts */
+  font-weight: 500; /* Slightly lighter for a refined look */
+  letter-spacing: 0.5px; /* Subtle spacing */
+}
+.todo-input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;outline:none;margin:6px 0 8px}
+#todoList{list-style:none;margin:0;padding:0;max-height:140px;overflow:auto}
+#todoList::-webkit-scrollbar { width: 0; height: 0; }
+#todoList { scrollbar-width: none; } /* Firefox */
+#todoList li{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,.18);transform:none}
+#todoList li.done span{text-decoration:line-through;opacity:.6}
+
+#todoList li.focused {
+  background: transparent !important;
+  border-radius: 0;
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.todo-edit-input {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.85);
+  color: #fff;
+  font-size: 1em; /* Match parent font size */
+  padding: 2px 4px 4px; /* Similar to greeting input */
+  outline: none;
+  width: 100%; /* Take full width of the original span */
+}
+
+@keyframes todoItemEnter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+#todoList li { 
+  animation: todoItemEnter .3s ease-out forwards;
+}
+
+
+/*
+ * Settings button (bottom-right)
+ * A small pill-shaped button used to open the Focus settings dialog.
+ * We define this separately from other toggles to avoid accidental inheritance
+ * from debug styles. The button blends into the UI with a dark frosted glass
+ * look similar to the to‑do toggle. When hovered or pressed it slightly
+ * brightens/dims for subtle feedback.
+ */
+.settings-btn {
+  position: fixed;
+  /* Explicitly unset left positioning in case other rules set it */
+  left: auto !important;
+  right: 20px !important;
+  bottom: 20px !important;
+  /* Increase the size for better discoverability */
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  /* Neutral glass color palette: dark translucent background with subtle border */
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .26);
+  backdrop-filter: blur(16px);
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  padding: 0;
+  transition: filter 0.12s ease, transform 0.12s ease;
+  /* Depth and separation from busy backgrounds */
+  box-shadow: 0 3px 10px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.15);
+
+  /* Prepare for fancy ring animation */
+  overflow: hidden;
+}
+
+/* Spinning ring surrounding the settings button */
+.settings-btn::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  bottom: -6px;
+  left: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.4);
+  opacity: 0.35;
+  pointer-events: none;
+  animation: spinRing 6s linear infinite;
+}
+
+@keyframes spinRing {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.settings-btn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px) scale(1.03);
+}
+.settings-btn:active {
+  filter: brightness(0.95);
+  transform: translateY(0) scale(0.97);
+}
+
+/* Additional styling for settings overlay content */
+/* Divider line separating sections within the settings card */
+.settings-divider {
+  margin: 20px 0;
+  border: none;
+  height: 1px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Customized upload button: appears more like a call to action with a descriptive label */
+.upload-btn {
+  /* Increase horizontal padding to accommodate longer text */
+  padding-left: 16px;
+  padding-right: 16px;
+  /* Keep the primary accent color but lighten the background slightly for readability */
+  background: #357AE8;
+  border-color: #357AE8;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.upload-btn:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px) scale(1.03);
+}
+.upload-btn:active {
+  filter: brightness(0.94);
+  transform: translateY(0) scale(0.97);
+}
+
+/* dialog */
+@keyframes dialogEnter { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+dialog#examsDialog{border:0;border-radius:16px;padding:0;background:rgba(0,0,0,.6);backdrop-filter:blur(12px);color:#fff;width:min(520px,92vw);animation:dialogEnter .3s ease-out forwards;opacity:0;transform:scale(0.95)}
+.exams-form{padding:16px}
+.exams-form h3{margin:0 0 12px}
+.exams-form label{display:block;margin:8px 0 6px}
+.exams-form input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;outline:none}
+/* Apply premium styling to the examDate input specifically, now that Flatpickr handles the calendar */
+#examDate {
+  color-scheme: dark; /* Maintain dark color scheme for native elements */
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  color: #fff;
+  outline: none;
+}
+
+.exams-form .row{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.btn{padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;transition:all .2s ease-in-out}
+.btn.primary{background:#1f6feb;border-color:#1f6feb}
+.btn.ghost{background:transparent}
+@media (max-width:720px){.clock{font-size:64px}.goal-input{width:80%}.right-rail{right:12px}}
+
+
+/* --- Premium micro-interactions --- */
+@keyframes pulseCheck {
+  0% { transform: scale(0.92) rotate(-45deg); }
+  60% { transform: scale(1.06) rotate(-45deg); }
+  100% { transform: scale(1.0) rotate(-45deg); }
+}
+.goal-check input{
+  -webkit-appearance:none; appearance:none;
+  width:18px; height:18px; margin:0 8px 0 0;
+  display:inline-grid; place-content:center;
+  position:relative; top:calc((1em - 18px)/2 - 1px); /* exact baseline centering */
+  border-radius:6px;
+  background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.05));
+  border:1px solid rgba(255,255,255,.28);
+  backdrop-filter:blur(8px);
+  box-shadow:0 5px 12px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.22);
+  transition:background .14s ease, box-shadow .14s ease, border-color .14s ease;
+}
+.goal-check input:hover{ filter: brightness(1.06); box-shadow: 0 9px 20px rgba(255,255,255,.10), inset 0 1px 0 rgba(255,255,255,.24); transform: translateY(-0.5px); }
+.goal-check input:active{ transform: translateY(0) scale(.98); }
+.goal-check input:checked::after{ animation: pulseCheck .18s ease-out; }
+
+.icon-btn{ transition: transform .12s ease, filter .12s ease, background .12s ease; }
+.icon-btn:hover{ transform: translateY(-1px) scale(1.04); filter: brightness(1.1); }
+.icon-btn:active{ transform: translateY(0) scale(.98); filter: brightness(1.0); }
+
+/* Quote change animation */
+@keyframes quoteFadeInUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.quote { 
+  position:fixed;left:50%;transform:translateX(-50%);bottom:18px;font-size:16px;text-shadow:0 2px 10px rgba(0,0,0,.65);
+  animation: quoteFadeInUp .5s ease-out forwards;
+  text-align: center;
+}
+
+/* Right rail exams - slightly larger gap for clarity */
+.right-rail{position:fixed;right:24px;top:86px;display:flex;flex-direction:column;gap: 8px;z-index:1}
+.exams-list.hidden{opacity:0;pointer-events:none}
+/* Premium glass cards */
+.exam-card{position:relative;width:180px;border-radius:18px;padding:12px 14px;backdrop-filter:blur(16px);background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.22);box-shadow:0 16px 34px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.22);animation:fadeInUp .45s ease both;margin-bottom:.1cm}
+.exam-card::before{content:'';position:absolute;inset:0;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,0) 42%);opacity:.35;pointer-events:none}
+.exam-card .days{font-size:24px;font-weight:700;margin-bottom:2px;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.exam-card .name{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exam-card .date{font-size:12px;opacity:.92}
+.exam-card.red{background:linear-gradient(180deg,rgba(255,95,95,.22),rgba(255,50,50,.10)),linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.05));border-color:rgba(255,110,110,.44);box-shadow:0 18px 36px rgba(255,0,0,.22),inset 0 1px 0 rgba(255,255,255,.25)}
+.exam-card.amber{background:linear-gradient(180deg,rgba(255,210,80,.22),rgba(255,160,0,.10)),linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.05));border-color:rgba(255,200,0,.42);box-shadow:0 18px 36px rgba(255,170,0,.22),inset 0 1px 0 rgba(255,255,255,.25)}
+.exam-card.teal{background:linear-gradient(180deg,rgba(0,210,210,.22),rgba(0,150,190,.10)),linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.05));border-color:rgba(0,200,200,.40);box-shadow:0 18px 36px rgba(0,170,170,.22),inset 0 1px 0 rgba(255,255,255,.25)}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes backgroundPan {
+  from { background-position: 0% 0%; }
+  to { background-position: 100% 100%; }
+}
+/* To-Do frosted dark */
+.todo-toggle{position:fixed;left:20px;bottom:20px;padding:8px 12px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.6);backdrop-filter:blur(12px);border-radius:12px;z-index:2;cursor:pointer}
+.todo-pop{position:fixed;left:20px;bottom:64px;width:300px;padding:12px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.6);backdrop-filter:blur(12px);border-radius:16px;box-shadow:0 12px 28px rgba(0,0,0,.35);z-index:2;opacity:0;transform:translateY(20px);transition:opacity .3s ease-out, transform .3s ease-out;pointer-events:none}
+.todo-pop.open{opacity:1;transform:translateY(0);pointer-events:auto}
+.todo-head{font-weight:600;margin-bottom:6px}
+.todo-input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;outline:none;margin:6px 0 8px}
+#todoList{list-style:none;margin:0;padding:0;max-height:140px;overflow:auto}
+#todoList::-webkit-scrollbar { width: 0; height: 0; }
+#todoList { scrollbar-width: none; } /* Firefox */
+#todoList li{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,.18);transform:none}
+#todoList li.done span{text-decoration:line-through;opacity:.6}
+
+@keyframes todoItemEnter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+#todoList li { 
+  animation: todoItemEnter .3s ease-out forwards;
+}
+
+/* dialog */
+@keyframes dialogEnter { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+dialog#examsDialog{border:0;border-radius:16px;padding:0;background:rgba(0,0,0,.6);backdrop-filter:blur(12px);color:#fff;width:min(520px,92vw);animation:dialogEnter .3s ease-out forwards;opacity:0;transform:scale(0.95)}
+.exams-form{padding:16px}
+.exams-form h3{margin:0 0 12px}
+.exams-form label{display:block;margin:8px 0 6px}
+.exams-form input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;outline:none}
+.exams-form .row{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.btn{padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;transition:all .2s ease-in-out}
+.btn.primary{background:#1f6feb;border-color:#1f6feb}
+.btn.ghost{background:transparent}
+@media (max-width:720px){.clock{font-size:64px}.goal-input{width:80%}.right-rail{right:12px}}
+
+
+/* ===== Premium micro-interactions: subtle bounce + ripple ===== */
+@keyframes rippleWave {
+  to { transform: scale(15); opacity: 0; }
+}
+@keyframes hoverLift {
+  0% { transform: translateY(0) scale(1); }
+  60% { transform: translateY(-2px) scale(1.02); }
+  100% { transform: translateY(-1px) scale(1.01); }
+}
+/* Elements that get ripples */
+.ripple { position: relative; overflow: hidden; }
+.ripple-ink {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  background: rgba(255,255,255,.35); transform: scale(0);
+  animation: rippleWave .6s ease-out forwards;
+}
+
+/* Subtle bounce on hover for key surfaces */
+.actions button:hover,
+.btn:hover,
+.icon-btn:hover,
+.exam-card:hover {
+  animation: hoverLift .25s ease-out forwards;
+  filter: brightness(1.06);
+}
+
+/* Exam card interactive glow */
+.exam-card:hover {
+  box-shadow:
+    0 20px 44px rgba(0,0,0,.42),
+    inset 0 1px 0 rgba(255,255,255,.28);
+}
+
+/* To-do pop items feel a bit alive */
+/* To-Do list alignment fixes */
+#todoList li{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 0;
+  border-bottom:1px dashed rgba(255,255,255,.18);
+  transform:none;                 /* prevent ripple/hover shifting layout */
+  position: relative; /* Added for absolute positioning of children */
+}
+
+.todo-action-controls {
+  display: flex;
+  align-items: center;
+  margin-left: auto; /* Pushes to the right */
+  position: relative; /* For positioning options */
+}
+
+/* Ellipsis toggle: increase visibility */
+.todo-item-options-toggle {
+	cursor: pointer;
+	font-weight: 600;
+	padding: 4px 8px;
+	border-radius: 6px;
+	opacity: 1;
+	background: rgba(255,255,255,0.15) !important;
+	color: #fff !important;
+	font-size: 16px;
+	margin-left: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 24px;
+	height: 24px;
+	transition: background 0.15s ease;
+}
+.todo-item-options-toggle:hover {
+	background: rgba(255,255,255,0.25) !important;
+}
+
+/* Options container: keep invisible by default; add subtle pill when open */
+.todo-item-options {
+	position: absolute;
+	right: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	display: flex;
+	flex-direction: row;
+	gap: 2px;
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	padding: 0;
+	box-shadow: none;
+	z-index: 10;
+	min-width: unset;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.12s ease-out;
+}
+.todo-item-options.open {
+	opacity: 1;
+	pointer-events: auto;
+	transform: translateY(-50%);
+	background: rgba(0,0,0,0.45);
+	border: 1px solid rgba(255,255,255,0.12);
+	border-radius: 6px;
+	padding: 2px;
+	box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+}
+
+/* Show options and hide ellipsis on hover of action controls */
+/* .todo-action-controls:hover .todo-item-options {
+  opacity: 1;
+  pointer-events: auto; /* Enable interactions when visible */
+} */
+
+/* .todo-action-controls:hover .todo-item-options-toggle {
+  opacity: 0;
+} */
+
+.todo-edit-btn, .todo-delete-btn {
+  width:20px; /* Further reduced size */
+  height:20px; /* Further reduced size */
+  /* Minimalist, non-glass styling */
+  background: transparent; /* No solid background */
+  border: none; /* No border */
+  border-radius: 4px; /* Slight rounding for hover effect */
+  box-shadow: none; /* No shadow */
+  transition: background 0.1s ease, border-color 0.1s ease; /* Faster subtle hover */
+}
+
+.todo-edit-btn svg, .todo-delete-btn svg {
+  width: 12px; /* Further reduced icon size */
+  height: 12px; /* Further reduced icon size */
+  color: #fff; /* White icon color */
+}
+
+.todo-edit-btn:hover, .todo-delete-btn:hover {
+  background: rgba(255, 255, 255, 0.05); /* Very faint highlight on hover */
+  border: 1px solid rgba(255, 255, 255, 0.08); /* Very subtle border on hover */
+}
+
+.todo-delete-btn {
+  background: transparent; /* Transparent by default */
+  border: none; /* No border by default */
+}
+
+.todo-delete-btn:hover {
+  background: rgba(255, 50, 50, 0.1); /* Subtle reddish tint on hover */
+  border: 1px solid rgba(255, 100, 100, 0.15); /* Subtle reddish border on hover */
+}
+
+#todoList li input[type="checkbox"]{
+  width:16px;
+  height:16px;
+  margin:0 8px 0 0;
+  flex:0 0 auto;
+  align-self:center;
+  vertical-align:middle;
+  accent-color:#1f6feb;
+}
+
+#todoList li span{
+  flex:1 1 auto;
+  line-height:1.2;
+  word-break:break-word;
+}
+
+/* Gentle hover without nudging layout */
+
+/* Reset to-do toggle to previous stable style (no animations) */
+.todo-toggle{transition:none !important; transform:none !important; filter:none !important;}
+
+/* Toggle icon color-swap animation */
+.todo-toggle svg .box{ stroke:#ffffff; fill:transparent; transition: fill .2s ease, stroke .2s ease; }
+.todo-toggle svg .tick{ stroke:#ffffff; transition: stroke .2s ease; }
+.todo-pop.open ~ .bottom .todo-toggle {}
+.todo-toggle.active svg .box{ fill:#ffffff; stroke:#ffffff; }
+.todo-toggle.active svg .tick{ stroke:#111111; }
+
+/* Unsplash credit pill */
+.credit-pill{
+  position:fixed; right:16px; bottom:16px;
+  width:28px; height:28px; display:inline-block;
+  border-radius:999px;
+  background:rgba(0,0,0,.28) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" fill="white"><path d="M20 7h6v12H6V7h6v5h8V7z"/></svg>') center/18px no-repeat;
+  border:1px solid rgba(255,255,255,.35);
+  backdrop-filter: blur(10px);
+  box-shadow:0 8px 18px rgba(0,0,0,.35);
+  text-decoration:none;
+}
+.credit-pill:hover{filter:brightness(1.08)}
+
+
+/* Credit icon visibility controller */
+.credit-pill{ 
+  opacity: 0; transform: translateY(6px); pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+}
+.credit-pill.visible{ opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+
+/* White calendar icon in date input */
+input[type="date"]::-webkit-calendar-picker-indicator{
+  filter: brightness(0) invert(1);
+  opacity: 1;
+}
+
+
+/* Premium To-Do checkbox */
+#todoList input[type="checkbox"]{
+  -webkit-appearance:none; appearance:none;
+  width:18px; height:18px; margin:0 10px 0 0;
+  display:inline-grid; place-content:center; vertical-align:middle;
+  border-radius:6px;
+  background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.05));
+  border:1px solid rgba(255,255,255,.28);
+  backdrop-filter:blur(8px);
+  box-shadow:0 5px 12px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.22);
+  transition:background .14s ease, box-shadow .14s ease, border-color .14s ease;
+}
+#todoList input[type="checkbox"]::after{
+  content:""; width:8px; height:5px;
+  border-left:2px solid #fff; border-bottom:2px solid #fff;
+  transform:scale(0) rotate(-45deg); transform-origin:center;
+  transition:transform .12s ease-out;
+}
+#todoList input[type="checkbox"]:checked{
+  background:
+    linear-gradient(180deg, rgba(31,111,235,.55), rgba(31,111,235,.32)),
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+  border-color:rgba(255,255,255,.50);
+  box-shadow:0 8px 18px rgba(31,111,235,.24), inset 0 1px 0 rgba(255,255,255,.26);
+}
+#todoList input[type="checkbox"]:checked::after{ transform:scale(1) rotate(-45deg); }
+
+/* Flatpickr overrides for premium glassmorphism look */
+.flatpickr-calendar {
+  background: rgba(0, 0, 0, 0.6) !important; /* Frosted dark background */
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 12px 28px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08) !important;
+  backdrop-filter: blur(12px) !important;
+  border-radius: 16px !important;
+}
+
+.flatpickr-months .flatpickr-month, .flatpickr-weekday, .flatpickr-day {
+  color: #fff !important;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months .flatpickr-month{
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year {
+  color: #fff !important;
+}
+
+.flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatflatpickr-day.selected.inRange, .flatpickr-day.today.selected, .flatpickr-day.prevMonth.selected, .flatpickr-day.nextMonth.selected, .flatpickr-day.selected:focus, .flatpickr-day.selected:hover, .flatpickr-day.startRange:focus, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:focus, .flatpickr-day.endRange:hover, .flatpickr-day.selected.inRange:focus, .flatpickr-day.selected.inRange:hover, .flatpickr-day.today.selected:focus, .flatpickr-day.today.selected:hover, .flatpickr-day.prevMonth.selected:focus, .flatpickr-day.prevMonth.selected:hover, .flatpickr-day.nextMonth.selected:focus, .flatpickr-day.nextMonth.selected:hover {
+  background: #1f6feb !important;
+  border-color: #1f6feb !important;
+  box-shadow: 0 0 0 3px rgba(31,111,235,.3) !important;
+}
+
+.flatpickr-day.today {
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.flatpickr-day.disabled, .flatpickr-day.prevMonth, .flatpickr-day.nextMonth {
+  opacity: 0.4 !important;
+}
+
+.flatpickr-day.flatpickr-disabled {
+  color: rgba(255,255,255,0.2) !important;
+}
+
+.flatpickr-day.inRange {
+  background: rgba(255,255,255,0.1) !important;
+  box-shadow: none !important;
+}
+
+.flatpickr-months .flatpickr-prev-month, .flatpickr-months .flatpickr-next-month {
+  color: #fff !important;
+  /* glass button style */
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+  border-radius: 8px !important;
+  height: 28px;
+  width: 28px;
+  line-height: 28px;
+  text-align: center;
+  transition: all .2s ease-in-out;
+}
+
+.flatpickr-months .flatpickr-prev-month:hover, .flatpickr-months .flatpickr-next-month:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px) scale(1.04);
+}
+
+.flatpickr-months .flatpickr-prev-month.flatpickr-disabled, .flatpickr-months .flatpickr-next-month.flatpickr-disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.todo-item-options-toggle svg {
+	width: 16px;
+	height: 16px;
+	color: #fff !important;
+	display: block;
+}
+
+.todo-action-controls {
+	display: flex;
+	align-items: center;
+	margin-left: auto;
+	position: relative;
+	gap: 8px;
+}
+
+.todo-pop ul li:hover, .todo-pop ul li.focused { background-color: rgba(255,255,255,0.08); }
+.todo-pop ul li.done { opacity: 0.6; }
+.todo-pop ul li.done span { text-decoration: line-through; }
+.todo-pop ul li input[type=checkbox] { margin-right: 10px; accent-color: #8ab4f8; }
+
+/* --- Smoother To-Do Button Styles --- */
+.todo-pop ul li .edit-btn,
+.todo-pop ul li .delete-btn {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 2px 4px;
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out, background-color 0.15s ease-out;
+}
+.todo-pop ul li .edit-btn { right: 40px; }
+.todo-pop ul li:hover .edit-btn,
+.todo-pop ul li:hover .delete-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* Override the global .icon-btn hover animation to remove the "shake" */
+.todo-pop ul li .icon-btn:hover {
+  animation: none; /* Disables the shaky hoverLift animation */
+  transform: translateY(-50%) scale(1.15); /* Keep vertical centering, just scale up */
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.todo-pop .todo-history-btn {
+  font-size: 11px;
+  margin-top: 8px;
+  color: var(--accent, #8ab4f8);
+  text-decoration: underline;
+  cursor: pointer;
+  display: none;
+  background: none;
+  border: none;
+  padding: 0;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+.todo-pop .todo-history-btn:hover {
+  opacity: 1;
+}
+.todo-pop .todo-history {
+  max-height: 120px;
+  overflow-y: auto;
+  margin-top: 6px;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(255,255,255,0.18);
+  display: none;
+}
+.todo-pop .todo-history .history-date {
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.8;
+  margin-top: 6px;
+}
+.todo-pop .todo-history .history-item {
+  font-size: 12px;
+  padding-left: 8px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  opacity: 0.9;
+}
+.todo-pop ul li .edit-input {
+  flex-grow: 1;
+  background: transparent;
+  border: none;
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 1em;
+  font-family: inherit;
+  padding: 4px 2px;
+  outline: none;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.todo-pop ul li .edit-input:focus {
+  border-bottom-color: #8ab4f8;
+}
+
+/* Footer (bottom row) */
+footer.bottom {
+
+}
+
+/* Settings floating button */
+/* settings button removed */
+
+/* Donate dialog matches exams dialog styling */
+dialog#donateDialog{ border:0; border-radius:16px; padding:0; background:#121212e6; color:#fff; width:min(520px,92vw); opacity:1; transform:none; box-shadow:0 24px 60px rgba(0,0,0,.5); }
+/* close X */
+.dialog-close{ position:absolute; top:8px; right:10px; background:transparent; border:0; color:#fff; font-size:20px; line-height:1; cursor:pointer; opacity:.8; }
+.dialog-close:hover{ opacity:1; }
+/* Premium donate content styling */
+.donate-form h3{ margin: 10px 0 8px; }
+.donate-content{ max-height:50vh; overflow:auto; padding-right:4px; }
+.donate-content{ color:#fff; line-height:1.45; }
+.donate-content h4{ margin: 10px 0 6px; opacity:.98; font-weight:600; }
+.donate-content p{ margin: 6px 0; opacity:.96; }
+.donate-content a{ color:#69a6ff; text-decoration:none; }
+.donate-content a:hover{ text-decoration:underline; }
+.donate-list{ margin: 6px 0 10px 20px; padding:0; list-style: disc; }
+.donate-list li{ margin: 6px 0; }
+
+/* When using two-column layout for the donate feature list, remove default bullets and split items evenly. */
+.donate-list.columns-two {
+  margin: 6px 0 10px 20px;
+  padding: 0;
+  list-style: none;
+  columns: 2;
+  column-gap: 20px;
+}
+.donate-list.columns-two li {
+  break-inside: avoid;
+  margin: 4px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Settings overlay (glass dialog) */
+#settingsOverlay{
+  position: fixed;
+  inset: 0;
+  /* Lightly dim the entire page when the overlay is active. A slightly
+     reduced opacity enhances the glass effect on the card below and
+     contributes to a premium feel without making the page too dark. */
+  /* Slightly lighter backdrop so bright images remain vibrant while ensuring
+     text remains legible. */
+  background: rgba(0, 0, 0, .35);
+  display: none;
+  z-index: 9999;
+  /* Prevent scrollbars from showing on the overlay itself. The content will
+     center vertically via absolute positioning of the card. Without this,
+     browsers may render a scrollbar if the card slightly overflows the viewport. */
+  overflow: hidden;
+}
+/* Show overlay when open class is added */
+#settingsOverlay.open {
+  display: block;
+}
+
+#settingsOverlay .settings-card{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  /* Start slightly scaled down and transparent for a smooth entrance */
+  transform: translate(-50%, -50%) scale(0.94);
+  width: min(520px, 92vw);
+  /* Let the card size itself to its content. Remove the artificial height limit */
+  max-height: none;
+  overflow-y: visible;
+  color: #ffffff;
+  border-radius: 18px;
+  /* Glassmorphism: subtle light gradient with frosted blur. Increase the
+     transparency to let the page’s colors shine through for a premium
+     frosted effect. */
+  background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.08));
+  border: 1px solid rgba(255,255,255,.32);
+  backdrop-filter: blur(22px) saturate(1.35);
+  padding: 20px;
+  box-shadow: 0 18px 42px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.24);
+  /* The card starts hidden and will transition in when the overlay is opened. */
+  opacity: 0;
+  transition: opacity .32s ease, transform .4s ease;
+}
+
+/* Hide WebKit scrollbars inside the settings card (no longer needed but kept for safety) */
+#settingsOverlay .settings-card::-webkit-scrollbar {
+  display: none;
+}
+
+/* When the overlay is opened, animate the settings card into view. The card
+   smoothly scales up to its full size and fades in, creating a premium
+   micro‑interaction. */
+#settingsOverlay.open .settings-card {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* removed old layout */
+.exam-tracker-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  transition: all 0.4s ease-in-out;
+}
+
+.exam-tracker-container.two-col {
+  grid-template-columns: 1fr 1fr;
+}
+
+.exam-card {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.exam-card.enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.exam-card.enter-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+/* --- Refined exam tracker layout --- */
+.exam-tracker-container.one-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.exam-tracker-container.one-col .exam-card {
+  width: 80%; /* original dimension, centered */
+}
+
+.exam-tracker-container.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.exam-tracker-container.two-col .exam-card {
+  width: 100%; /* auto-resize inside grid */
+}
+
+
+.exams-list.two-col{ display:grid; grid-template-columns:repeat(2, minmax(140px, 1fr)); gap:8px; }
+.exams-list:not(.two-col) .exam-card{ max-width:180px; }
+.exams-list.two-col .exam-card{ max-width:initial; width:100%; }
+
+
+/* --- Enforce a max of 3 exam cards visible --- */
+.exams-list .exam-card:nth-child(n+4){ display:none !important; }
+/* Ensure card titles wrap within the card without overflowing */
+.exam-card .name{ overflow-wrap:anywhere; word-break:break-word; }
+
+
+.exam-card.today .days {
+  background: #ff4d4d;
+  color: white;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Cohort Card (feature-flagged). Scoped; no global overrides.
+   ────────────────────────────────────────────────────────────── */
+.left-rail{
+  position:fixed;
+  left:24px;
+  /* Position the cohort card closer to the top to align visually with the
+     clock/greeting area and the "Track Your Goals" header.  Lower values
+     reduce the vertical gap without interfering with the page header. */
+  /* Position the cohort card very close to the page header.  A small
+     top offset keeps the card tucked near the top-left corner without
+     overlapping the browser UI elements. */
+  top:24px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  /* Raise z-index so the cohort card sits above the to‑do list popover */
+  z-index:3;
+}
+.cohort-card.exam-card{
+  /* Glassy, premium look similar to the exam cards */
+  /* Increase width so that longer facts wrap less and so the to‑do panel
+     doesn’t overlap with the card */
+  min-width:200px;
+  max-width:260px;
+  padding:14px 16px;
+  backdrop-filter: blur(16px);
+  background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.05));
+  border: 1px solid rgba(255,255,255,.22);
+  box-shadow: 0 14px 30px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.22);
+  position: relative;
+  /* Allow dropdown and other absolute children to escape the card bounds */
+  overflow: visible;
+  /* Subtle animation for the cohort card appearing */
+  animation: fadeInUp 0.5s ease both;
+  /* Smooth transitions for hover effects */
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+}
+
+/* Hover interaction for the cohort card: lift slightly, add glow and lighten background */
+.cohort-card.exam-card:hover {
+  /* On hover, slightly brighten and deepen the card without moving it */
+  transform: none;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.07));
+  border-color: rgba(255,255,255,0.3);
+}
+
+/* Add a subtle inner gradient on top of the glass card for extra depth */
+.cohort-card.exam-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,0) 42%);
+  opacity: .35;
+  pointer-events: none;
+}
+.cohort-card .head{
+  display:flex; align-items:center; justify-content:space-between; gap:6px; padding-bottom:6px; margin-bottom:6px;
+  border-bottom:1px solid rgba(255,255,255,0.25);
+}
+.cohort-card .title{
+  /* Restore original styling for the heading */
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.2px;
+  white-space:nowrap;
+  opacity:.9;
+  color: inherit;
+}
+.cohort-card .selector{
+  position:relative;
+}
+.cohort-card .selector button{
+  font-size:12px; font-weight:700; padding:4px 8px; border-radius:10px;
+  background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18);
+  cursor:pointer;
+}
+.cohort-card .selector button:focus-visible{ outline:2px solid var(--accent,#69a6ff); outline-offset:2px; }
+.cohort-card .fact{
+  font-size:13px;
+  /* Use a tighter line height to keep the card compact; width adjustments will handle longer lines */
+  line-height:1.2;
+  white-space:pre-wrap;
+  opacity:.95;
+  user-select:text;
+  /* Fade in the fact content when it changes */
+  animation: fadeInUp 0.4s ease;
+}
+.cohort-card .fact-actions{
+  display:flex; justify-content:flex-end; margin-top:6px; gap:6px;
+}
+.cohort-card .fact-actions .linklike{
+  font-size:11px;
+  font-weight:600;
+  color: var(--accent, #69a6ff);
+  text-decoration: none;
+  padding:4px 8px;
+  background: rgba(105,166,255,0.15);
+  border: 1px solid rgba(105,166,255,0.4);
+  border-radius:8px;
+  cursor:pointer;
+  opacity:1;
+  transition: background .2s ease, box-shadow .2s ease;
+}
+.cohort-card .fact-actions .linklike:hover{
+  background: rgba(105,166,255,0.25);
+  box-shadow:0 2px 6px rgba(0,0,0,.3);
+}
+.cohort-card .linklike{
+  font-size:11px; opacity:.9; text-decoration:underline; cursor:pointer; background:none; border:none; padding:0;
+}
+.cohort-hover-tab{
+  position:fixed;
+  left:0;
+  top:86px;
+  width:28px;
+  height:28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  background: rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.35);
+  border-radius:0 10px 10px 0;
+  z-index:1;
+  cursor:pointer;
+}
+.cohort-hover-tab:focus-visible{ outline:2px solid var(--accent,#69a6ff); outline-offset:2px; }
+.cohort-tooltip{
+  position:absolute; left:24px; top:0; font-size:11px; padding:4px 8px; border-radius:8px;
+  background: rgba(0,0,0,.7); color:#fff; white-space:nowrap; transform:translateY(-4px);
+}
+
+/* When the cohort card is present, shift the main center content to the right
+   so that it doesn’t overlap with the card.  The margin corresponds to the
+   approximate width of the card plus its left offset (24px).  Adjust as
+   needed if the card size changes. */
+/* Removed left margin adjustment to ensure the main content stays centered */
+body.has-cohort-card .center {
+  margin-left: 0;
+}
+
+/* When the cohort card is present, shift the to‑do toggle and popover to the right
+   so they don’t overlap with the card.  The offset accounts for the card’s
+   left position (24px), its approximate width and padding (around 240px),
+   and the default margin of 20px on the toggle/pop. */
+
+/* Highlight cohort dropdown options on hover for better visibility */
+.cohort-card .selector ul li:hover {
+  /* Darken option when hovered to improve contrast on the opaque dropdown */
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+}
+
